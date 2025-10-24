@@ -1,0 +1,18 @@
+.container {
+  width: 100%;
+  max-width: 72rem; /* ≈1152px */
+  margin: 0 auto;
+  padding: 0;
+}
+
+@media (min-width: 48rem) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  .container {
+    padding: 0 2rem;
+  }
+}

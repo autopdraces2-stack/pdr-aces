@@ -1,0 +1,226 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: var(--bg-primary);
+}
+
+.headerSpacer {
+  height: 88px;
+}
+
+/* ✅ Grid layout: [brand] [nav/flex] [burger] */
+.inner {
+  height: 88px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 1.25rem;
+  padding-left: 1rem;
+
+  /* No extra paddings here; Container handles symmetric padding */
+  position: relative; /* local stacking context */
+  min-width: 0; /* allow middle column to shrink */
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.logo {
+  height: auto;
+  width: auto;
+  max-height: 64px;
+}
+
+/* Middle column: nav area (shrinks gracefully) */
+.nav {
+  display: none; /* hidden on mobile */
+  align-items: center;
+  justify-content: flex-end; /* keep items to the right of middle column */
+  gap: 0.75rem;
+  min-width: 0; /* let it shrink */
+}
+
+/* Links */
+.link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
+  text-decoration: none !important;
+}
+.link__text {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  color: var(--text-primary) !important;
+  transition: color 180ms ease, background 180ms ease !important;
+}
+.link__text:hover {
+  color: var(--color-blue) !important;
+}
+.active {
+  color: var(--color-blue) !important;
+}
+
+/* Right column: burger — stays inside container edge */
+.burger {
+  justify-self: end; /* ✅ pin to the right INSIDE the grid column */
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 120ms ease;
+  z-index: 2;
+  color: var(--text-primary);
+  flex-shrink: 0; /* don’t compress */
+}
+.burger:hover {
+  transform: translateY(-1px);
+}
+
+.burger span {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  transition: transform 220ms ease, opacity 200ms ease, top 220ms ease;
+}
+.burger span:nth-child(1) {
+  top: 15px;
+}
+.burger span:nth-child(2) {
+  top: 22px;
+}
+.burger span:nth-child(3) {
+  top: 29px;
+}
+.burgerOpen span:nth-child(1) {
+  transform: rotate(45deg);
+  top: 22px;
+}
+.burgerOpen span:nth-child(2) {
+  opacity: 0;
+}
+.burgerOpen span:nth-child(3) {
+  transform: rotate(-45deg);
+  top: 22px;
+}
+
+/* Mobile overlay */
+.mobile {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: background 220ms ease, opacity 220ms ease;
+  z-index: 90; /* below header by default */
+}
+.mobileOpen {
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 110;
+}
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+.sheetHeader {
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+}
+
+.close {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+.close span {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  transition: transform 200ms ease;
+}
+.close span:nth-child(1) {
+  transform: rotate(45deg);
+}
+.close span:nth-child(2) {
+  transform: rotate(-45deg);
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+.mobileLink {
+  display: block;
+  padding: 1rem 0.875rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: background 160ms ease, color 160ms ease;
+}
+.mobileLink:hover {
+  background: var(--bg-accent);
+  color: var(--color-blue-dark);
+}
+.mobileActive {
+  color: var(--color-blue);
+}
+
+/* Desktop */
+@media (min-width: 960px) {
+  .inner {
+    padding-left: 0;
+  }
+  .nav {
+    display: flex;
+  } /* middle column visible */
+  .burger {
+    display: none;
+  }
+  .mobile {
+    display: none;
+  }
+}
+
+/* Focus rings */
+.link:focus-visible,
+.burger:focus-visible,
+.mobileLink:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}

@@ -1,0 +1,25 @@
+.textarea {
+  resize: none;
+  width: 100%;
+  min-height: 120px;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px var(--color-blue-light);
+}

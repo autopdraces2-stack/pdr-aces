@@ -1,0 +1,30 @@
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: currentColor;
+}
+
+.sm {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+.md {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+.lg {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+
+.stroke-1 {
+  stroke-width: 1;
+}
+.stroke-1_5 {
+  stroke-width: 1.5;
+}
+.stroke-2{
+  stroke-width: 2;
+}

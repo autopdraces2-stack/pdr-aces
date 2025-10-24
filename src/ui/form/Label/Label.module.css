@@ -1,0 +1,15 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.required {
+  color: var(--color-red);
+}
+
+.text {
+  line-height: 1.2;
+}
