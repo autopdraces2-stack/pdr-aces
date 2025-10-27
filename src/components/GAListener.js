@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function GAListener() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const url =
-      pathname + (searchParams.size ? `?${searchParams.toString()}` : "");
+    if (typeof window === "undefined") return;
+
+    const qs = window.location.search;
+    const url = pathname + qs;
+
     window.dataLayer?.push({ event: "pageview", page_path: url });
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return null;
 }
