@@ -5,6 +5,7 @@ import {
   PHOTO_TOO_LARGE,
   PHOTO_TOO_MANY,
   PHOTO_TYPE,
+  CONTACT_REQUIRED,
   photoUnreadable,
 } from "./contactLimits";
 import { isEstimateImage, prepareEstimatePhoto } from "./prepareEstimatePhoto";
@@ -909,6 +910,12 @@ export function initSiteEffects() {
       }
 
       if (estimate) {
+        const phone = String(form.phone?.value || "").trim();
+        const email = String(form.email?.value || "").trim();
+        if (!phone && !email) {
+          showError(CONTACT_REQUIRED);
+          return;
+        }
         const total = photos.reduce((sum, file) => sum + file.size, 0);
         if (total > MAX_PHOTO_BYTES) {
           showError(PHOTO_TOO_LARGE);

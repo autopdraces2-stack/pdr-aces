@@ -26,6 +26,13 @@ export default function RequestPage() {
         </p>
 
         <form className="form" noValidate>
+          <input
+            className="form__fax"
+            name="fax"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
           <label className="field">
             <span className="field__label">Your Name</span>
             <input type="text" name="name" autoComplete="name" required />

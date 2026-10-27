@@ -1691,9 +1691,30 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Request form ---------- */
 .form {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+}
+.form__fax {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.form__contact-note {
+  grid-column: 1 / -1;
+  margin: -6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(217, 214, 230, .7);
 }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .field--wide, .form__submit { grid-column: 1 / -1; }

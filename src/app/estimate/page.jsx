@@ -37,6 +37,13 @@ export default function EstimatePage() {
           <h2 className="estimate__title">Request an Estimate</h2>
 
           <form className="form form--estimate" noValidate>
+            <input
+              className="form__fax"
+              name="fax"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
             <label className="field field--wide">
               <span className="field__label">
                 Your Name<b aria-hidden="true">*</b>
@@ -67,6 +74,9 @@ export default function EstimatePage() {
                 placeholder="Enter your email"
               />
             </label>
+            <p className="form__contact-note">
+              Add a phone number or an email so we can send the estimate.
+            </p>
             <label className="field field--wide">
               <span className="field__label">Describe the Damage</span>
               <textarea

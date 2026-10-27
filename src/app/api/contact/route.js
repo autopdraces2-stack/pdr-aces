@@ -1,32 +1,24 @@
 import nodemailer from "nodemailer";
 import * as yup from "yup";
 import { NextResponse } from "next/server";
+import { allowContactRequest, clientIp } from "@/lib/contactRateLimit";
 import {
-  ALLOWED_PHOTO_TYPES,
+  CONTACT_REQUIRED,
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
   PHOTO_TOO_LARGE,
   PHOTO_TOO_MANY,
   PHOTO_TYPE,
+  RATE_LIMITED,
 } from "@/lib/contactLimits";
 
 export const runtime = "nodejs";
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
 const json = (body, status) =>
   new NextResponse(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+    headers: { "Content-Type": "application/json" },
   });
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-}
 
 const emptyToUndefined = (value) => {
   const trimmed = value == null ? "" : String(value).trim();
@@ -84,7 +76,8 @@ const estimateSchema = yup
     email: emailField(false),
     damage: yup.string().transform(emptyToUndefined).max(2000, "Description too long").optional(),
   })
-  .required();
+  .required()
+  .test("contact-method", CONTACT_REQUIRED, (value) => Boolean(value?.phone || value?.email));
 
 const escapeHtml = (s = "") =>
   String(s)
@@ -93,12 +86,6 @@ const escapeHtml = (s = "") =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-
-const safeName = (name, index) => {
-  const base = String(name || `photo-${index + 1}`).split(/[/\\]/).pop();
-  const clean = base.replace(/[^\w.\- ]+/g, "").slice(0, 80);
-  return clean || `photo-${index + 1}`;
-};
 
 const labelFor = (type) => (type === "training" ? "Training" : "Estimate");
 
@@ -139,6 +126,32 @@ const toHtml = (data, photoCount) => `
   </div>
 `;
 
+function sameOrigin(req) {
+  const origin = req.headers.get("origin");
+  if (!origin) return false;
+  let requestOrigin;
+  let headerOrigin;
+  try {
+    requestOrigin = new URL(req.url).origin;
+    headerOrigin = new URL(origin).origin;
+  } catch {
+    return false;
+  }
+  if (headerOrigin !== requestOrigin) return false;
+  const fetchSite = req.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin") return false;
+  return true;
+}
+
+function honeypotFilled(fields) {
+  return String(fields?.fax == null ? "" : fields.fax).trim() !== "";
+}
+
+async function isJpeg(file) {
+  const header = new Uint8Array(await file.slice(0, 3).arrayBuffer());
+  return header.length >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+}
+
 async function readPayload(req) {
   const contentType = req.headers.get("content-type") || "";
   if (contentType.includes("multipart/form-data")) {
@@ -153,6 +166,7 @@ async function readPayload(req) {
         phone: String(form.get("phone") || ""),
         email: String(form.get("email") || ""),
         damage: String(form.get("damage") || ""),
+        fax: String(form.get("fax") || ""),
       },
       photos,
     };
@@ -164,6 +178,13 @@ async function readPayload(req) {
 
 export async function POST(req) {
   try {
+    if (!allowContactRequest(clientIp(req))) {
+      return json({ ok: false, error: RATE_LIMITED }, 429);
+    }
+    if (!sameOrigin(req)) {
+      return json({ ok: false, error: "Failed to send request" }, 403);
+    }
+
     let payload;
     try {
       payload = await readPayload(req);
@@ -172,6 +193,9 @@ export async function POST(req) {
     }
 
     const { fields, photos } = payload;
+    if (honeypotFilled(fields)) {
+      return json({ ok: true, message: "Email sent successfully" }, 200);
+    }
     if (photos.length > MAX_PHOTOS) {
       return json({ ok: false, error: PHOTO_TOO_MANY }, 400);
     }
@@ -179,8 +203,10 @@ export async function POST(req) {
     if (total > MAX_PHOTO_BYTES) {
       return json({ ok: false, error: PHOTO_TOO_LARGE }, 400);
     }
-    if (photos.some((file) => !ALLOWED_PHOTO_TYPES.includes(file.type))) {
-      return json({ ok: false, error: PHOTO_TYPE }, 400);
+    for (const file of photos) {
+      if (!(await isJpeg(file))) {
+        return json({ ok: false, error: PHOTO_TYPE }, 400);
+      }
     }
 
     const schema = fields?.type === "estimate" ? estimateSchema : trainingSchema;
@@ -205,9 +231,9 @@ export async function POST(req) {
 
     const attachments = await Promise.all(
       photos.map(async (file, index) => ({
-        filename: safeName(file.name, index),
+        filename: `photo-${index + 1}.jpg`,
         content: Buffer.from(await file.arrayBuffer()),
-        contentType: file.type,
+        contentType: "image/jpeg",
       }))
     );
 
