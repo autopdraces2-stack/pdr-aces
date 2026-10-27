@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "libheif-js": "^1.23.5",
-    "next": "15.5.6",
+    "next": "^15.5.28",
     "nodemailer": "^7.0.9",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^19.1.10",
+    "react-dom": "^19.1.10",
     "yup": "^1.7.1"
   }
 }
