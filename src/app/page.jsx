@@ -1,5 +1,5 @@
 import { ArrowIcon, ArrowLink } from "@/components/site/ArrowLink";
-import { BeforeAfter } from "@/components/site/BeforeAfter";
+import { WorkCarousel } from "@/components/site/WorkCarousel";
 
 export const metadata = {
   title: "PDR Aces Academy | Paintless Dent Repair Training",
@@ -202,30 +202,7 @@ export default function HomePage() {
             Contact us to discuss your repair needs.
           </p>
         </div>
-        <div
-          className="cf"
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="My work photos"
-        >
-          <div className="cf__frame" tabIndex="0">
-            <div className="cf__stage">
-              {pairs.map((pair) => (
-                <BeforeAfter key={pair.label} {...pair} />
-              ))}
-            </div>
-          </div>
-          <button className="cf__nav cf__nav--prev" type="button" aria-label="Previous photo">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <button className="cf__nav cf__nav--next" type="button" aria-label="Next photo">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </div>
+        <WorkCarousel pairs={pairs} />
         <div className="work__cta">
           <ArrowLink href="/estimate">Get a repair estimate</ArrowLink>
         </div>
