@@ -36,6 +36,13 @@ const pairs = [
     beforeAlt: "Before: A dent in a green hood under the PDR light",
     label: "Before and after 4",
   },
+  {
+    after: "/assets/ba-5-after.png",
+    before: "/assets/ba-5-before.png",
+    afterAlt: "After: The silver quarter panel straight again after repair",
+    beforeAlt: "Before: A deep dent in a silver quarter panel",
+    label: "Before and after 5",
+  },
 ];
 
 export default function HomePage() {
@@ -206,13 +213,6 @@ export default function HomePage() {
               {pairs.map((pair) => (
                 <BeforeAfter key={pair.label} {...pair} />
               ))}
-              <BeforeAfter
-                after="/assets/ba-3-after.jpg"
-                before="/assets/ba-3-before.jpg"
-                afterAlt=""
-                beforeAlt=""
-                hidden
-              />
             </div>
           </div>
           <button className="cf__nav cf__nav--prev" type="button" aria-label="Previous photo">

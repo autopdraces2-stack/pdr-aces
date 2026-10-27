@@ -1,18 +1,10 @@
-export function BeforeAfter({
-  after,
-  before,
-  afterAlt,
-  beforeAlt,
-  label,
-  hidden = false,
-}) {
+export function BeforeAfter({ after, before, afterAlt, beforeAlt, label }) {
   return (
     <div
       className="cf__card cf__card--ba"
-      role={hidden ? undefined : "group"}
-      aria-roledescription={hidden ? undefined : "slide"}
-      aria-label={hidden ? undefined : label}
-      aria-hidden={hidden || undefined}
+      role="group"
+      aria-roledescription="slide"
+      aria-label={label}
     >
       <div className="ba">
         <img className="ba__after" src={after} alt={afterAlt} draggable="false" />

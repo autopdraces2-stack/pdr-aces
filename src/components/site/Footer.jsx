@@ -13,7 +13,7 @@ export function Footer() {
       <div className="footer__inner">
         <div className="footer__brand">
           <a href="/" className="footer__logo">
-            <img src="/assets/pdr-aces-logo.png" alt="PDR Aces" width="1024" height="901" />
+            <img src="/assets/logo.png" alt="PDR Aces Logo" width="1024" height="901" />
           </a>
           <p>Hands-on paintless dent repair training in Denver, Colorado.</p>
           <div className="footer__row">
