@@ -676,12 +676,48 @@ export function initSiteEffects() {
 
   const preparingForms = new Set();
   const submittingForms = new Set();
+  const overLimitForms = new Set();
   const preparedPhotos = new WeakMap();
+
+  function sameFileList(left, right) {
+    if (left.length !== right.length) return false;
+    for (let i = 0; i < left.length; i++) {
+      const a = left[i];
+      const b = right[i];
+      if (a === b) continue;
+      if (
+        a.name !== b.name ||
+        a.size !== b.size ||
+        a.lastModified !== b.lastModified ||
+        a.type !== b.type
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   function syncSubmitButton(form) {
     const button = form?.querySelector('[type="submit"]');
     if (!button) return;
-    button.disabled = preparingForms.has(form) || submittingForms.has(form);
+    button.disabled =
+      preparingForms.has(form) || submittingForms.has(form) || overLimitForms.has(form);
+  }
+
+  function setPhotoLimit(form, input, over) {
+    if (form) {
+      if (over) overLimitForms.add(form);
+      else overLimitForms.delete(form);
+      if (!over) {
+        const formError = form.querySelector(".form__error");
+        if (formError && formError.textContent === PHOTO_TOO_MANY) {
+          formError.hidden = true;
+          formError.textContent = "";
+        }
+      }
+    }
+    if (input) input.setCustomValidity(over ? PHOTO_TOO_MANY : "");
+    syncSubmitButton(form);
   }
 
   function setFormPreparing(form, on) {
@@ -710,6 +746,7 @@ export function initSiteEffects() {
     let files = [];
     let generation = 0;
     let syncing = false;
+    let ignoreEcho = false;
 
     function showUploadError(messages) {
       if (!error) return;
@@ -738,7 +775,9 @@ export function initSiteEffects() {
         remove.addEventListener("click", () => {
           if (preparingForms.has(form)) return;
           files.splice(i, 1);
-          showUploadError([]);
+          const over = files.length > MAX_PHOTOS;
+          showUploadError(over ? [PHOTO_TOO_MANY] : []);
+          setPhotoLimit(form, input, over);
           sync();
         });
         li.append(img, remove);
@@ -747,22 +786,37 @@ export function initSiteEffects() {
     }
     function sync() {
       if (form) preparedPhotos.set(form, files.slice());
+      ignoreEcho = true;
       syncing = true;
       try {
         const dt = new DataTransfer();
         files.forEach((f) => dt.items.add(f));
         input.files = dt.files;
       } catch {
+        ignoreEcho = false;
         /* Older browsers still show the thumbnails and submit the prepared files. */
       } finally {
         syncing = false;
+      }
+      if (ignoreEcho) {
+        queueMicrotask(() => {
+          ignoreEcho = false;
+        });
+        setTimeout(() => {
+          ignoreEcho = false;
+        }, 0);
       }
       render();
     }
 
     on(input, "change", async () => {
       if (syncing) return;
+      if (ignoreEcho) {
+        ignoreEcho = false;
+        return;
+      }
       const picked = [...input.files];
+      if (sameFileList(picked, files)) return;
       const run = ++generation;
       setFormPreparing(form, true);
       const messages = [];
@@ -777,12 +831,8 @@ export function initSiteEffects() {
         if (run !== generation || disposed) return;
         if (rejectedType) messages.push(PHOTO_TYPE);
 
-        const room = Math.max(0, MAX_PHOTOS - files.length);
-        const kept = accepted.slice(0, room);
-        if (accepted.length > kept.length) messages.push(PHOTO_TOO_MANY);
-
         const prepared = [];
-        for (const file of kept) {
+        for (const file of accepted) {
           if (run !== generation || disposed) return;
           const jpeg = await prepareEstimatePhoto(file);
           if (run !== generation || disposed) return;
@@ -791,11 +841,18 @@ export function initSiteEffects() {
         }
         if (run !== generation || disposed) return;
         files = files.concat(prepared);
+        const over = files.length > MAX_PHOTOS;
+        if (over) messages.push(PHOTO_TOO_MANY);
         showUploadError(messages);
+        setPhotoLimit(form, input, over);
         sync();
       } catch {
         if (run !== generation || disposed) return;
-        showUploadError([photoUnreadable("this photo")]);
+        const over = files.length > MAX_PHOTOS;
+        const failure = [photoUnreadable("this photo")];
+        if (over) failure.unshift(PHOTO_TOO_MANY);
+        showUploadError(failure);
+        setPhotoLimit(form, input, over);
         sync();
       } finally {
         if (run === generation && !disposed) setFormPreparing(form, false);
@@ -815,7 +872,6 @@ export function initSiteEffects() {
   document.querySelectorAll(".form").forEach((form) => {
     on(form, "submit", async (e) => {
       e.preventDefault();
-      if (!form.reportValidity()) return;
       const error = form.querySelector(".form__error");
       const button = form.querySelector('[type="submit"]');
       const showError = (message) => {
@@ -823,25 +879,37 @@ export function initSiteEffects() {
         error.hidden = false;
         error.textContent = message;
       };
-      if (error) {
-        error.hidden = true;
-        error.textContent = "";
-      }
 
       const estimate = form.classList.contains("form--estimate");
       const photos = estimate
         ? (preparedPhotos.get(form) || []).filter((file) => file && file.size > 0)
         : [];
+      const uploadInput = estimate ? form.querySelector(".upload__input") : null;
+      const inputCount = uploadInput?.files?.length || 0;
       if (estimate && preparingForms.has(form)) {
         showError(PHOTO_PREPARING);
         return;
       }
+      if (estimate && (photos.length > MAX_PHOTOS || inputCount > MAX_PHOTOS)) {
+        setPhotoLimit(form, uploadInput, true);
+        const uploadError = form.querySelector(".upload__error");
+        if (uploadError) {
+          uploadError.hidden = false;
+          uploadError.textContent = PHOTO_TOO_MANY;
+        }
+        showError(PHOTO_TOO_MANY);
+        form.reportValidity();
+        return;
+      }
+
+      if (!form.reportValidity()) return;
+      if (error) {
+        error.hidden = true;
+        error.textContent = "";
+      }
+
       if (estimate) {
         const total = photos.reduce((sum, file) => sum + file.size, 0);
-        if (photos.length > MAX_PHOTOS) {
-          showError(PHOTO_TOO_MANY);
-          return;
-        }
         if (total > MAX_PHOTO_BYTES) {
           showError(PHOTO_TOO_LARGE);
           return;
@@ -897,6 +965,7 @@ export function initSiteEffects() {
     ac.abort();
     preparingForms.clear();
     submittingForms.clear();
+    overLimitForms.clear();
     document.querySelectorAll(".form").forEach((form) => syncSubmitButton(form));
     cleanups.forEach((fn) => fn());
   };
