@@ -136,17 +136,22 @@ export function initSiteEffects() {
       run();
     }
 
-    on(document, "click", (e) => {
-      const link = e.target.closest('a[href^="#"]');
-      if (!link || e.defaultPrevented) return;
-      const id = link.getAttribute("href").slice(1);
-      const el = id && document.getElementById(id);
-      if (!el || !el.getClientRects().length || el.classList.contains("pg")) return;
-      e.preventDefault();
-      const offset = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
-      history.pushState(null, "", "#" + id);
-      glide(el.getBoundingClientRect().top + window.scrollY - offset);
-    });
+    // Phones update scrollY after scrollTo, so this glide is cancelled on the
+    // first frame and the prevented native jump never happens. Let the browser
+    // follow the hash instead. Desktop still glides, in step with the wheel scroller.
+    if (!touch) {
+      on(document, "click", (e) => {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link || e.defaultPrevented) return;
+        const id = link.getAttribute("href").slice(1);
+        const el = id && document.getElementById(id);
+        if (!el || !el.getClientRects().length || el.classList.contains("pg")) return;
+        e.preventDefault();
+        const offset = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+        history.pushState(null, "", "#" + id);
+        glide(el.getBoundingClientRect().top + window.scrollY - offset);
+      });
+    }
 
     cleanups.push(() => {
       if (raf) cancelAnimationFrame(raf);
