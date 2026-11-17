@@ -15,7 +15,7 @@ export function Footer() {
           <a href="/" className="footer__logo">
             <img src="/assets/logo.png" alt="PDR Aces Logo" width="1024" height="901" />
           </a>
-          <p>Hands-on paintless dent repair training in Denver, Colorado.</p>
+          <p>Hands-On Paintless Dent Repair Experience in Denver, Colorado</p>
           <div className="footer__row">
             <div className="footer__social">
               <a

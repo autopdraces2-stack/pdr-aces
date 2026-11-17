@@ -53,7 +53,7 @@ export function Header() {
           </li>
         </ul>
         <ArrowLink href="/request" className="afb afb--sm">
-          Training Inquiry
+          Learn more
         </ArrowLink>
       </nav>
     </header>

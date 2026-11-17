@@ -19,34 +19,34 @@ export default function TrainingPage() {
       <div className="page__inner">
         <p className="page__eyebrow">Program</p>
         <h1 className="page__title">
-          Paintless Dent Repair <span>Training</span>
+          Paintless Dent Repair <span>Experience</span>
         </h1>
 
         <dl className="details">
           <div className="details__row">
-            <dt>Duration</dt>
-            <dd>2 Months</dd>
+            <dt>Focus</dt>
+            <dd>Real-World PDR Techniques</dd>
           </div>
           <div className="details__row">
             <dt>Location</dt>
             <dd>Denver, Colorado</dd>
           </div>
           <div className="details__row">
-            <dt>Next Session</dt>
-            <dd>January–February 2027</dd>
+            <dt>Availability</dt>
+            <dd>Contact for Details</dd>
           </div>
           <div className="details__row">
-            <dt>Training Type</dt>
-            <dd>Hands-on</dd>
+            <dt>Format</dt>
+            <dd>Hands-On</dd>
           </div>
           <div className="details__row">
-            <dt>Tuition</dt>
+            <dt>Pricing</dt>
             <dd>Available Upon Request</dd>
           </div>
         </dl>
 
         <a href="/request" className="btn btn--lg">
-          Request program details
+          Request Experience Details
           <ArrowIcon />
         </a>
       </div>

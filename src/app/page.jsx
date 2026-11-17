@@ -4,7 +4,7 @@ import { WorkCarousel } from "@/components/site/WorkCarousel";
 export const metadata = {
   title: "PDR Aces Academy | Paintless Dent Repair Training",
   description:
-    "Hands-on paintless dent repair training in Denver, Colorado. Learn PDR in 2 months.",
+    "Hands-On Paintless Dent Repair Experience in Denver, Colorado. Learn PDR in 2 months.",
 };
 
 const pairs = [
@@ -52,19 +52,19 @@ export default function HomePage() {
         <h1 className="visually-hidden">PDRaces Academy</h1>
         <div className="hero__content">
           <p className="hero__title">
-            Learn paintless
+            Learn Paintless
             <br />
-            dent repair
+            Dent Repair
             <br />
-            <span>in 2 months</span>
+            <span>Through Hands-On Experience</span>
           </p>
           <p className="hero__text">
-            Hands-on PDR training in Denver, Colorado. Learn professional dent
-            repair techniques and develop the skills to start your journey in
-            the industry.
+            Hands-on PDR training in Denver, Colorado. Explore PDR techniques,
+            discover the tools and methods behind real repairs, and gain
+            practical experience working with dents.
           </p>
           <a href="/training" className="btn btn--lg btn--cta">
-            Explore training
+            Explore PDR Experience
             <ArrowIcon />
           </a>
         </div>
@@ -81,52 +81,79 @@ export default function HomePage() {
             <ol className="cards cards--3">
               <li className="card">
                 <span className="card__num">01</span>
-                <svg className="card__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="card__icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z" />
                 </svg>
-                <h3 className="card__title">Learn a Specialized Skill</h3>
+                <h3 className="card__title">Preserve Original Factory Paint</h3>
               </li>
               <li className="card">
                 <span className="card__num">02</span>
-                <svg className="card__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="card__icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
                 </svg>
-                <h3 className="card__title">Build a Career or Business</h3>
+                <h3 className="card__title">
+                  Repair Hail Damage and Door Dings
+                </h3>
               </li>
               <li className="card">
                 <span className="card__num">03</span>
-                <svg className="card__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="card__icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="M7 11V6a2 2 0 0 1 4 0v4M11 10V4a2 2 0 0 1 4 0v6M15 10V6a2 2 0 0 1 4 0v8a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.6-4.4a1.8 1.8 0 0 1 3-1.9L7 14" />
                 </svg>
-                <h3 className="card__title">Get Hands-On Experience</h3>
+                <h3 className="card__title">Save Money on Dent Repairs</h3>
               </li>
             </ol>
           </div>
 
-          <div className="feature feature--path scrolly__step" data-step="2" id="program">
+          <div
+            className="feature feature--path scrolly__step"
+            data-step="2"
+            id="program"
+          >
             <h2 className="feature__title">
-              From beginner to <span>real-world repairs</span>
+              From First Dents to <span>Real-World Repairs</span>
             </h2>
             <ol className="cards cards--4">
               <li className="card">
                 <span className="card__num">01</span>
                 <h3 className="card__title">PDR Fundamentals</h3>
-                <p className="card__text">Understand dents, lighting and metal movement.</p>
+                <p className="card__text">
+                  Understand dents, lighting and metal movement.
+                </p>
               </li>
               <li className="card">
                 <span className="card__num">02</span>
                 <h3 className="card__title">Tools & Techniques</h3>
-                <p className="card__text">Learn rods, glue pulling and knockdown work.</p>
+                <p className="card__text">
+                  Learn rods, glue pulling and knockdown work.
+                </p>
               </li>
               <li className="card">
                 <span className="card__num">03</span>
                 <h3 className="card__title">Hail Damage Repair</h3>
-                <p className="card__text">Assess and repair hail-damaged panels.</p>
+                <p className="card__text">
+                  Assess and repair hail-damaged panels.
+                </p>
               </li>
               <li className="card">
                 <span className="card__num">04</span>
                 <h3 className="card__title">Real Vehicle Practice</h3>
-                <p className="card__text">Build your skills through supervised practice.</p>
+                <p className="card__text">
+                  Get hands-on with real vehicle panels and explore the
+                  techniques used in actual dent repairs
+                </p>
               </li>
             </ol>
           </div>
@@ -161,9 +188,9 @@ export default function HomePage() {
         <div className="about__content">
           <h2 className="about__eyebrow">Meet Your Instructor</h2>
           <p className="about__headline">
-            <span>Real experience</span> Real repairs
+            <span>Real Experience</span> Real Repairs
             <br />
-            Real training
+            Real Techniques
           </p>
           <blockquote className="about__quote">
             <p>
@@ -215,8 +242,8 @@ export default function HomePage() {
             Let’s get you <span>started</span>
           </p>
           <p className="contact__text">
-            Questions about the training or dent repair? Call or send an email,
-            and we’ll get back to you.
+            Questions About the Experience or Dent Repair? Call or send email,
+            and we will get back to you.
           </p>
         </div>
 

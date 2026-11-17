@@ -4,7 +4,8 @@ import { pageOpenGraph } from "@/lib/pageMeta";
 
 export const metadata = {
   title: "Request Details | PDR Aces Academy",
-  description: "Request details about the next PDR training session in Denver, Colorado.",
+  description:
+    "Request details about the next PDR training session in Denver, Colorado.",
   openGraph: pageOpenGraph({
     url: "/assets/why-pdr.webp",
     width: 1632,
@@ -21,8 +22,8 @@ export default function RequestPage() {
           Ready to learn <span>PDR?</span>
         </h1>
         <p className="page__lead">
-          Interested in joining our next training session? Send us your
-          information, and we’ll contact you with program details.
+          Interested in exploring paintless dent repair hands-on? Fill out the
+          form and we’ll contact you with details
         </p>
 
         <form className="form" noValidate>

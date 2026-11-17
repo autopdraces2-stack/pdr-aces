@@ -30,7 +30,7 @@ export const metadata = {
     template: "%s",
   },
   description:
-    "Hands-on paintless dent repair training in Denver, Colorado. Learn PDR in 2 months.",
+    "Hands-On Paintless Dent Repair Experience in Denver, Colorado. Learn PDR in 2 months.",
   icons: {
     icon: "/favicon.ico",
   },
