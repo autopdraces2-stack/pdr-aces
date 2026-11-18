@@ -37,7 +37,7 @@ export function Header() {
                   : undefined
               }
             >
-              PDR Training
+              PDR Experience
             </a>
           </li>
           <li>
