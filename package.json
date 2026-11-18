@@ -8,7 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "intl-tel-input": "^29.5.11",
     "libheif-js": "^1.23.5",
+    "libphonenumber-js": "^1.13.16",
     "next": "^15.5.28",
     "nodemailer": "^7.0.9",
     "react": "^19.1.10",

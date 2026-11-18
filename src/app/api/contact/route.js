@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import * as yup from "yup";
 import { NextResponse } from "next/server";
 import { allowContactRequest, clientIp } from "@/lib/contactRateLimit";
@@ -6,6 +7,7 @@ import {
   CONTACT_REQUIRED,
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
+  PHONE_INVALID,
   PHOTO_TOO_LARGE,
   PHOTO_TOO_MANY,
   PHOTO_TYPE,
@@ -13,6 +15,8 @@ import {
 } from "@/lib/contactLimits";
 
 export const runtime = "nodejs";
+
+
 
 const json = (body, status) =>
   new NextResponse(JSON.stringify(body), {
@@ -25,17 +29,23 @@ const emptyToUndefined = (value) => {
   return trimmed ? trimmed : undefined;
 };
 
+const parsedPhone = (value) => {
+  const phone = value ? parsePhoneNumberFromString(String(value)) : undefined;
+  return phone?.isValid() ? phone : null;
+};
+
 const phoneField = (required) => {
   let field = yup
     .string()
     .transform((value) => {
-      const digits = value ? String(value).replace(/\D+/g, "") : "";
-      return digits || undefined;
+      const raw = value == null ? "" : String(value).trim();
+      if (!raw) return undefined;
+      const phone = parsedPhone(raw);
+      return phone ? phone.number : raw;
     })
-    .test("digits-9-15", "Phone is invalid", (val) => {
+    .test("phone-valid", PHONE_INVALID, (val) => {
       if (!val) return true;
-      const n = String(val).length;
-      return n >= 9 && n <= 15;
+      return parsedPhone(val)?.number === val;
     });
   if (required) field = field.required("Phone is required");
   return field;
@@ -54,30 +64,50 @@ const emailField = (required) => {
 const trainingSchema = yup
   .object({
     type: yup.string().oneOf(["training"]).required(),
-    name: yup.string().trim().min(2, "Name is required").max(120, "Name too long").required("Name is required"),
+    name: yup
+      .string()
+      .trim()
+      .min(2, "Name is required")
+      .max(120, "Name too long")
+      .required("Name is required"),
     phone: phoneField(true),
     email: emailField(true),
     source: yup
       .string()
       .oneOf(
         ["Instagram", "TikTok", "Facebook", "YouTube"],
-        "Please choose where you saw us"
+        "Please choose where you saw us",
       )
       .required("Please choose where you saw us"),
-    message: yup.string().transform(emptyToUndefined).max(2000, "Message too long").optional(),
+    message: yup
+      .string()
+      .transform(emptyToUndefined)
+      .max(2000, "Message too long")
+      .optional(),
   })
   .required();
 
 const estimateSchema = yup
   .object({
     type: yup.string().oneOf(["estimate"]).required(),
-    name: yup.string().trim().min(2, "Name is required").max(120, "Name too long").required("Name is required"),
+    name: yup
+      .string()
+      .trim()
+      .min(2, "Name is required")
+      .max(120, "Name too long")
+      .required("Name is required"),
     phone: phoneField(false),
     email: emailField(false),
-    damage: yup.string().transform(emptyToUndefined).max(2000, "Description too long").optional(),
+    damage: yup
+      .string()
+      .transform(emptyToUndefined)
+      .max(2000, "Description too long")
+      .optional(),
   })
   .required()
-  .test("contact-method", CONTACT_REQUIRED, (value) => Boolean(value?.phone || value?.email));
+  .test("contact-method", CONTACT_REQUIRED, (value) =>
+    Boolean(value?.phone || value?.email),
+  );
 
 const escapeHtml = (s = "") =>
   String(s)
@@ -89,13 +119,28 @@ const escapeHtml = (s = "") =>
 
 const labelFor = (type) => (type === "training" ? "Training" : "Estimate");
 
+const flagEmoji = (country) => {
+  if (!country || !/^[A-Z]{2}$/.test(country)) return "";
+  return [...country]
+    .map((char) => String.fromCodePoint(0x1f1e6 + char.charCodeAt(0) - 65))
+    .join("");
+};
+
+const createSubject = (data) => {
+  const title = `New ${labelFor(data.type)} request: ${data.name}`;
+  const flag = flagEmoji(parsedPhone(data.phone)?.country || "");
+  return flag ? `${flag} ${title}` : title;
+};
+
+const phoneDisplay = (e164) => parsedPhone(e164)?.formatInternational() || e164;
+
 const rowsFor = (data, photoCount) => {
   const rows = [
     ["Type", labelFor(data.type)],
     ["Name", data.name],
   ];
   if (data.email) rows.push(["Email", data.email]);
-  if (data.phone) rows.push(["Phone", data.phone]);
+  if (data.phone) rows.push(["Phone", phoneDisplay(data.phone)]);
   if (data.source) rows.push(["Source", data.source]);
   if (data.message) rows.push(["Message", data.message]);
   if (data.damage) rows.push(["Damage", data.damage]);
@@ -104,9 +149,11 @@ const rowsFor = (data, photoCount) => {
 };
 
 const toText = (data, photoCount) =>
-  [`New ${labelFor(data.type)} Request`, "", ...rowsFor(data, photoCount).map(([k, v]) => `${k}: ${v}`)].join(
-    "\n"
-  );
+  [
+    `New ${labelFor(data.type)} Request`,
+    "",
+    ...rowsFor(data, photoCount).map(([k, v]) => `${k}: ${v}`),
+  ].join("\n");
 
 const toHtml = (data, photoCount) => `
   <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;color:#111">
@@ -117,8 +164,12 @@ const toHtml = (data, photoCount) => `
           .map(
             ([label, value]) => `<tr>
               <td style="padding:8px 12px;border:1px solid #eee;background:#f8fafc;width:160px;vertical-align:top;">${escapeHtml(label)}</td>
-              <td style="padding:8px 12px;border:1px solid #eee;white-space:pre-wrap;">${escapeHtml(value)}</td>
-            </tr>`
+              <td style="padding:8px 12px;border:1px solid #eee;white-space:pre-wrap;">${
+                label === "Phone" && data.phone
+                  ? `<a href="tel:${escapeHtml(data.phone)}">${escapeHtml(value)}</a>`
+                  : escapeHtml(value)
+              }</td>
+            </tr>`,
           )
           .join("")}
       </tbody>
@@ -149,7 +200,12 @@ function honeypotFilled(fields) {
 
 async function isJpeg(file) {
   const header = new Uint8Array(await file.slice(0, 3).arrayBuffer());
-  return header.length >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+  return (
+    header.length >= 3 &&
+    header[0] === 0xff &&
+    header[1] === 0xd8 &&
+    header[2] === 0xff
+  );
 }
 
 async function readPayload(req) {
@@ -209,10 +265,14 @@ export async function POST(req) {
       }
     }
 
-    const schema = fields?.type === "estimate" ? estimateSchema : trainingSchema;
+    const schema =
+      fields?.type === "estimate" ? estimateSchema : trainingSchema;
     let data;
     try {
-      data = await schema.validate(fields, { abortEarly: false, stripUnknown: true });
+      data = await schema.validate(fields, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
     } catch (ve) {
       const message = ve?.inner?.[0]?.message || ve.message || "Invalid input";
       return json({ ok: false, error: message }, 400);
@@ -234,7 +294,7 @@ export async function POST(req) {
         filename: `photo-${index + 1}.jpg`,
         content: Buffer.from(await file.arrayBuffer()),
         contentType: "image/jpeg",
-      }))
+      })),
     );
 
     const transporter = nodemailer.createTransport({
@@ -246,7 +306,7 @@ export async function POST(req) {
       from: senderAddress,
       to: senderAddress,
       ...(data.email ? { replyTo: data.email } : {}),
-      subject: `New ${labelFor(data.type)} request: ${data.name}`,
+      subject: createSubject(data),
       text: toText(data, attachments.length),
       html: toHtml(data, attachments.length),
       attachments,

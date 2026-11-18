@@ -1,3 +1,4 @@
+import intlTelInput from "intl-tel-input";
 import {
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
@@ -6,6 +7,7 @@ import {
   PHOTO_TOO_MANY,
   PHOTO_TYPE,
   CONTACT_REQUIRED,
+  PHONE_INVALID,
   photoUnreadable,
 } from "./contactLimits";
 import { isEstimateImage, prepareEstimatePhoto } from "./prepareEstimatePhoto";
@@ -729,6 +731,71 @@ export function initSiteEffects() {
     });
   });
 
+  const phoneWidgets = [...document.querySelectorAll(".js-phone")]
+    .filter((input) => input instanceof HTMLInputElement)
+    .map((input) =>
+      intlTelInput(input, {
+        initialCountry: "us",
+        countryOrder: ["us", "ca", "mx"],
+        separateDialCode: true,
+        allowedNumberTypes: null,
+        containerClass: "phone-input",
+        loadUtils: () => import("intl-tel-input/utils"),
+      })
+    );
+  document.querySelectorAll(".js-phone").forEach((input) => {
+    const clearPhoneError = () => {
+      if (input instanceof HTMLInputElement) input.setCustomValidity("");
+    };
+    on(input, "input", clearPhoneError);
+    on(input, "countrychange", clearPhoneError);
+  });
+  cleanups.push(() => {
+    phoneWidgets.forEach((widget) => widget.destroy());
+  });
+
+  async function syncPhone(form) {
+    const input = form.querySelector(".js-phone");
+    const hidden = form.querySelector('input[name="phone"]');
+    if (!(input instanceof HTMLInputElement) || !(hidden instanceof HTMLInputElement)) {
+      return;
+    }
+    const widget = intlTelInput.getInstance(input);
+    if (!widget) {
+      hidden.value = "";
+      if (input.value.trim()) input.setCustomValidity(PHONE_INVALID);
+      return;
+    }
+    try {
+      await widget.promise;
+    } catch {
+      /* A typed number stays invalid when the validation data never loads. */
+    }
+    if (disposed) return;
+    const national = input.value.trim();
+    if (!national) {
+      input.value = "";
+      hidden.value = "";
+      input.setCustomValidity("");
+      return;
+    }
+    let number = "";
+    let valid = false;
+    try {
+      valid = widget.isValidNumberPrecise() === true;
+      if (valid) number = widget.getNumber(intlTelInput.NUMBER_FORMAT.E164);
+    } catch {
+      valid = false;
+    }
+    if (!valid || !number.startsWith("+")) {
+      hidden.value = "";
+      input.setCustomValidity(PHONE_INVALID);
+      return;
+    }
+    hidden.value = number;
+    input.setCustomValidity("");
+  }
+
   document.querySelectorAll(".form").forEach((form) => {
     on(form, "submit", async (e) => {
       e.preventDefault();
@@ -762,14 +829,26 @@ export function initSiteEffects() {
         return;
       }
 
-      if (!form.reportValidity()) return;
+      await syncPhone(form);
+      if (disposed) return;
+      if (!form.reportValidity()) {
+        const phoneInput = form.querySelector(".js-phone");
+        if (
+          phoneInput instanceof HTMLInputElement &&
+          document.activeElement === phoneInput &&
+          phoneInput.validationMessage === PHONE_INVALID
+        ) {
+          showError(PHONE_INVALID);
+        }
+        return;
+      }
       if (error) {
         error.hidden = true;
         error.textContent = "";
       }
 
       if (estimate) {
-        const phone = String(form.phone?.value || "").trim();
+        const phone = String(form.querySelector(".js-phone")?.value || "").trim();
         const email = String(form.email?.value || "").trim();
         if (!phone && !email) {
           showError(CONTACT_REQUIRED);

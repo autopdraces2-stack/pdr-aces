@@ -60,10 +60,11 @@ export default function EstimatePage() {
               <span className="field__label">Phone Number</span>
               <input
                 type="tel"
-                name="phone"
+                className="js-phone"
                 autoComplete="tel"
                 placeholder="Enter your phone number"
               />
+              <input type="hidden" name="phone" defaultValue="" />
             </label>
             <label className="field">
               <span className="field__label">Email Address</span>

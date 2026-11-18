@@ -40,7 +40,8 @@ export default function RequestPage() {
           </label>
           <label className="field">
             <span className="field__label">Phone Number</span>
-            <input type="tel" name="phone" autoComplete="tel" required />
+            <input type="tel" className="js-phone" autoComplete="tel" required />
+            <input type="hidden" name="phone" defaultValue="" />
           </label>
           <label className="field">
             <span className="field__label">Email Address</span>

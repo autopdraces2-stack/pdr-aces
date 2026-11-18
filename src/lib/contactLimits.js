@@ -7,6 +7,7 @@ export const PHOTO_TOO_LARGE =
 export const PHOTO_TYPE = "Please upload image files only.";
 export const PHOTO_PREPARING = "Still preparing photos. Please wait.";
 export const CONTACT_REQUIRED = "Enter a phone number or email so we can reach you.";
+export const PHONE_INVALID = "Enter a valid phone number.";
 export const RATE_LIMITED = "Please wait a few minutes and try again.";
 
 export function photoUnreadable(name) {
