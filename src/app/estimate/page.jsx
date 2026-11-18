@@ -1,8 +1,9 @@
 import { ArrowIcon } from "@/components/site/ArrowLink";
 import { FormSuccess } from "@/components/site/FormSuccess";
 import { pageOpenGraph } from "@/lib/pageMeta";
+import { isSiteAvailable } from "@/lib/siteAvailability";
 
-export const metadata = {
+const pageMetadata = {
   title: "Free Dent Repair Estimate | PDR Aces Academy",
   description:
     "Get a free paintless dent repair estimate in Denver, Colorado. Send photos of door dings or hail damage.",
@@ -13,6 +14,11 @@ export const metadata = {
     alt: "After: The same pillar straight again after repair",
   }),
 };
+
+export async function generateMetadata() {
+  if (!isSiteAvailable()) return {};
+  return pageMetadata;
+}
 
 export default function EstimatePage() {
   return (

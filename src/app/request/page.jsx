@@ -1,8 +1,9 @@
 import { ArrowIcon } from "@/components/site/ArrowLink";
 import { FormSuccess } from "@/components/site/FormSuccess";
 import { pageOpenGraph } from "@/lib/pageMeta";
+import { isSiteAvailable } from "@/lib/siteAvailability";
 
-export const metadata = {
+const pageMetadata = {
   title: "Request Details | PDR Aces Academy",
   description:
     "Request details about the next PDR training session in Denver, Colorado.",
@@ -13,6 +14,11 @@ export const metadata = {
     alt: "Hands-on paintless dent repair training",
   }),
 };
+
+export async function generateMetadata() {
+  if (!isSiteAvailable()) return {};
+  return pageMetadata;
+}
 
 export default function RequestPage() {
   return (

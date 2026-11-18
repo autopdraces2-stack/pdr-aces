@@ -3,6 +3,8 @@ import Script from "next/script";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { SiteEffects } from "@/components/site/SiteEffects";
+import { Unavailable } from "@/components/site/Unavailable";
+import { isSiteAvailable } from "@/lib/siteAvailability";
 
 import "../styles/site.css";
 
@@ -21,7 +23,7 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-export const metadata = {
+const siteMetadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://pdr-aces.vercel.app"
   ),
@@ -49,11 +51,37 @@ export const metadata = {
   },
 };
 
+export async function generateMetadata() {
+  if (!isSiteAvailable()) {
+    return {
+      metadataBase: siteMetadata.metadataBase,
+      title: "Site unavailable | PDR Aces Academy",
+      description: "The site is currently unavailable.",
+      robots: { index: false, follow: false },
+      icons: siteMetadata.icons,
+    };
+  }
+
+  return siteMetadata;
+}
+
 export default function RootLayout({ children }) {
+  const fontClass = `no-js ${manrope.variable} ${montserrat.variable}`;
+
+  if (!isSiteAvailable()) {
+    return (
+      <html lang="en" className={fontClass} suppressHydrationWarning>
+        <body>
+          <Unavailable />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html
       lang="en"
-      className={`no-js ${manrope.variable} ${montserrat.variable}`}
+      className={fontClass}
       suppressHydrationWarning
     >
       <head>

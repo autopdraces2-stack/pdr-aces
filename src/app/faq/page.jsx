@@ -1,3 +1,5 @@
+import { isSiteAvailable } from "@/lib/siteAvailability";
+
 const faqs = [
   {
     q: "How much should I budget for PDR tools?",
@@ -21,11 +23,16 @@ const faqs = [
   },
 ];
 
-export const metadata = {
+const pageMetadata = {
   title: "FAQ | PDR Aces Academy",
   description:
     "Frequently asked questions about the PDR Aces paintless dent repair training in Denver, Colorado.",
 };
+
+export async function generateMetadata() {
+  if (!isSiteAvailable()) return {};
+  return pageMetadata;
+}
 
 export default function FaqPage() {
   return (

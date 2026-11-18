@@ -1,11 +1,17 @@
 import { ArrowIcon, ArrowLink } from "@/components/site/ArrowLink";
 import { WorkCarousel } from "@/components/site/WorkCarousel";
+import { isSiteAvailable } from "@/lib/siteAvailability";
 
-export const metadata = {
+const pageMetadata = {
   title: "PDR Aces Academy | Paintless Dent Repair Training",
   description:
     "Hands-On Paintless Dent Repair Experience in Denver, Colorado. Learn PDR in 2 months.",
 };
+
+export async function generateMetadata() {
+  if (!isSiteAvailable()) return {};
+  return pageMetadata;
+}
 
 const pairs = [
   {

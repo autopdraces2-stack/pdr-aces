@@ -3,6 +3,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import * as yup from "yup";
 import { NextResponse } from "next/server";
 import { allowContactRequest, clientIp } from "@/lib/contactRateLimit";
+import { isSiteAvailable } from "@/lib/siteAvailability";
 import {
   CONTACT_REQUIRED,
   MAX_PHOTO_BYTES,
@@ -234,6 +235,9 @@ async function readPayload(req) {
 
 export async function POST(req) {
   try {
+    if (!isSiteAvailable()) {
+      return json({ ok: false, error: "The site is currently unavailable." }, 503);
+    }
     if (!allowContactRequest(clientIp(req))) {
       return json({ ok: false, error: RATE_LIMITED }, 429);
     }
